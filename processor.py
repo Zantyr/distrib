@@ -47,7 +47,7 @@ class MainProcessor(Processor):
             try:
                 item = self.inbox.popleft()
                 if item[:4] == "MSG\x00":
-                    print item[5:]
+                    print item[4:]+"\n"
 
                 elif item[:6] == "GFILE!":
                     name,content = request[6:].split('\0',1)
