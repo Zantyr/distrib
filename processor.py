@@ -43,9 +43,9 @@ class MainProcessor(Processor):
         while True:
             try:
                 item = self.inbox.popleft()
-                if item[:4] == "MSG\x00"
+                if item[:4] == "MSG\x00":
                     print item[5:]
-                elif item[:6] == "GFILE!"
+                elif item[:6] == "GFILE!":
                     name = ""
                     for i in range(7, len(item)):
                         if item[i] != "\x00":

