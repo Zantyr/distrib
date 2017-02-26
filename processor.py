@@ -50,16 +50,16 @@ class MainProcessor(Processor):
                     print item[4:]+"\n"
 
                 elif item[:6] == "GFILE!":
-                    name,content = request[6:].split('\0',1)
+                    name,content = item[6:].split('\0',1)
                     with open("download{}{}".format(os.sep,name), "w") as f:
                         f.write(content)
 
                 elif item[:6] == "SFILE!":
-                    name,ipaddr = item[6:].split('!',1)
+                    name,user = item[6:].split('!',1)
                     if os.path.isfile("download{}{}".format(os.sep,name)):
                          with open("download{}{}".format(os.sep,name),'r') as f:
                              msg = "GFILE!{}\0{}".format(name,f.read())
-                         self.outbox.append((name,msg))
+                         self.outbox.append((user,msg))
                     else:
                          print "No file: download{}{}".format(os.sep,name)
                          #Zwraca wyslanemu brak pliku. Outbox powinien informowac o braku pliku.
