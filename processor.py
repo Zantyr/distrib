@@ -1,3 +1,4 @@
+import os
 class Processor(object):
     def __init__(self,inbox,outbox):
         """
@@ -44,7 +45,7 @@ class MainProcessor(Processor):
             try:
                 item = self.inbox.popleft()
                 if item[:4] == "MSG\x00":
-                    print item[5:]
+                    print item[:5]
                 elif item[:6] == "GFILE!":
                     name = ""
                     for i in range(7, len(item)):
@@ -54,10 +55,27 @@ class MainProcessor(Processor):
                         else:
                             #tworzy plik
                             with open("download\\%s" % name, "wb") as f:
-                                f.write(item[i+1:])
+                                f.write(item[:i+1])
                                 f.close()
                             break
                 elif item[:6] == "SFILE!":
-                    raise NotImplementedError
+                    name = ""
+                    addr = ""
+                    for i in range(7, len(item)):
+                        if item[i] != "!":
+                            name+=item[i]
+                            #szuka kolejnego wykrzyknika, dodaje nazwe
+                        else:
+                            if os.path.isfile("download\\%s" % name):
+                                for x in range(i, len(item)):
+                                    if item[x] != "\x00":
+                                        addr+=item[x]
+                                    else:
+                                        self.outbox.append((name,addr))
+                                        #podaje do outboxa tuple z nazwa pliku i adresem na ktory nalezy go wyslac.
+                            else:
+                                self.outbox.append((None, addr))
+                                break 
+                                #Zwraca wyslanemu brak pliku. Outbox powinien informowac o braku pliku.
             except IndexError:
                 pass
