@@ -1,0 +1,130 @@
+from collections import deque
+import socket
+import threading
+
+
+class Processor(object):
+    def __init__(self,inbox,outbox):
+        """
+        This object processes messages. Looks into inbox, picks a msg,
+        and returns processed msg into the outbox. Has internal state, which
+        dictates what messages to look.
+        """
+        self.inbox = inbox
+        self.outbox = outbox
+        self.thread = threading.Thread(target=self.execute)
+    def execute(self):
+        """
+        Method passed to thread after its instantiation. Does the real processing
+        """
+        raise NotImplementedError
+
+    def run(self):
+        self.thread.start()
+        
+    def interrupt(self,signal):
+        """
+        Interrupts the processor, may cancel or suspend transaction.
+        Is superior to any other computation on the processor.
+        Interrupts are queuable
+        """
+        raise NotImplementedError
+
+
+class MockProcessor(Processor):
+    def execute(self):
+        while True:
+            try:
+                item = self.inbox.popleft()
+                print "{} received: {}".format(id(self),item)
+            except IndexError:
+                pass
+
+
+
+
+
+
+
+class Actor(object):
+    def __init__(self,threads=5,targetProcessor=Processor,bind_port=1488,bind_ip="0.0.0.0"):
+        self.inbox = deque()
+        self.outbox = deque()
+        self.sender = threading.Thread(target=self.send)
+        self.receiver = threading.Thread(target=self.recv)
+        self.threadpool = [targetProcessor(self.inbox, self.outbox) for x in range(threads)]
+        self.addressbook = {}
+        self.bind_ip = bind_ip
+        self.bind_port = bind_port
+        self.sender.start()
+        self.receiver.start()
+        [x.run() for x in self.threadpool]
+        print "Actor started"
+
+    def send(self):
+        """
+        Loop over mailbox and dispatch the messages.
+        Archive the messages if did not sent
+        """
+        while True:
+            try:
+                (target,message) = self.outbox.popleft()
+                target_ip,target_port = self.addressbook[target]
+                client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                client.connect((target_ip, target_port))
+                client.send(message)
+                resp = client.recv(4096)
+                #what to do with response?
+            except IndexError:
+                pass
+            except KeyError:
+                pass    #there is no target in the addressbook
+
+    def recv(self):
+        """
+        Listen on tcp/ip port and put the messages into the inbox
+        """
+        self._serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._serv.bind((self.bind_ip, self.bind_port))
+        self._serv.listen(5)
+        while True:
+            client,addr = self._serv.accept()
+            client_handler = threading.Thread(target=self.handle_client, args=(client,))
+            client_handler.start()
+
+    def handle_client(self,client_socket):
+        """
+        Internal processing of incoming TCP packets
+        """
+        #larger buffer for larger messages
+        request = client_socket.recv(1024)
+        self.inbox.append(request)
+        client_socket.send("ACK!")
+        client_socket.close()
+
+
+
+
+
+
+class Console(Actor):
+    def __init__(self,*args,**kwargs):
+        """
+        A master console: allows to control the threads, post problems to solve and manage the net
+        """
+        super(Console,self).__init__(*args,**kwargs)
+        while True:
+            line = raw_input("xD -> ")
+            line = line.split(' ',2)
+            if line[0].lower() == 'quit':
+                quit()
+            elif line[0].lower() == 'add':
+                tp = line[2].split(' ',1)
+                self.addressbook[line[1]] = (tp[0],int(tp[1]))
+            elif line[0].lower() == 'list':
+                for key in self.addressbook:
+                    print "{} has an address {}".format(key,str(self.addressbook[key]))
+            elif line[0].lower() == 'send':
+                self.outbox.append((line[1],line[2]))
+
