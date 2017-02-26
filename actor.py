@@ -75,6 +75,7 @@ class Console(Actor):
         """
         super(Console,self).__init__(*args,**kwargs)
         if 'cmd' not in kwargs:
+            import readline
             while True:
                 line = raw_input("xD -> ")
                 self.parse(line)
@@ -83,16 +84,19 @@ class Console(Actor):
             sys.exit()
 
     def parse(self,line):
-        line = line.split(' ',2)
-        if line[0].lower() == 'quit':
-            sys.exit()
-        elif line[0].lower() == 'add':
-            tp = line[2].split(' ',1)
-            self.addressbook[line[1]] = (tp[0],int(tp[1]))
-        elif line[0].lower() == 'list':
-            for key in self.addressbook:
-                print "{} has an address {}".format(key,str(self.addressbook[key]))
-        elif line[0].lower() == 'send':
-             self.outbox.append((line[1],"MSG\0"+line[2]))
-        elif line[0].lower() == 'sendFile':
-             self.inbox.append("SFILE!{}!{}".format(line[2],line[1]))
+        try:
+            line = line.split(' ',2)
+            if line[0].lower() == 'quit':
+                sys.exit()
+            elif line[0].lower() == 'add':
+                tp = line[2].split(' ',1)
+                self.addressbook[line[1]] = (tp[0],int(tp[1]))
+            elif line[0].lower() == 'list':
+                for key in self.addressbook:
+                    print "{} has an address {}".format(key,str(self.addressbook[key]))
+            elif line[0].lower() == 'send':
+                 self.outbox.append((line[1],"MSG\0"+line[2]))
+            elif line[0].lower() == 'sendFile':
+                 self.inbox.append("SFILE!{}!{}".format(line[2],line[1]))
+        except IndexError:
+            print "Console Syntax Error"
