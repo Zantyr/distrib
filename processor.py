@@ -74,13 +74,13 @@ class MainProcessor(Processor):
         #promises: local
         #deferred: remote
         elif item[:6] == "CPROM!": #createPromise
-            lang,executor,receiver,code == item[6:].split('\0',3)
+            lang,executor,receiver,code = item[6:].split('\0',3)
             digest = str(hash(item))
             self.environment["P"+digest] = promise.Promise(executor,lang,code)
             self.outbox.append((executor,
                 "RDEFR!{}\0{}\0{}\0".format(lang,receiver,digest,code)))
         elif item[:6] == "RDEFR!": #receiveDeferred
-            lang,requester,digest,code == item[6:].split('\0',3)
+            lang,requester,digest,code = item[6:].split('\0',3)
             dfr = deferred.Deferred(self.outbox,digest,requester,lang,code)
             self.environment["D"+digest] = dfr
         elif item[:6] == "RPROM!": #receivePromise
