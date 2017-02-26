@@ -95,5 +95,4 @@ class Console(Actor):
         elif line[0].lower() == 'send':
              self.outbox.append((line[1],"MSG\0"+line[2]))
         elif line[0].lower() == 'sendFile':
-             self.inbox.append("SFILE!{}!{}".format(line[2],
-                    self.addressbook[line[1]][0]))
+             self.inbox.append("SFILE!{}!{}".format(line[2],line[1]))

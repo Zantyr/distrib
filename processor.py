@@ -48,28 +48,21 @@ class MainProcessor(Processor):
                 item = self.inbox.popleft()
                 if item[:4] == "MSG\x00":
                     print item[5:]
+
                 elif item[:6] == "GFILE!":
                     name,content = request[6:].split('\0',1)
-                    with open("download\\%s" % name, "w") as f:
+                    with open("download{}{}".format(os.sep,name), "w") as f:
                         f.write(content)
+
                 elif item[:6] == "SFILE!":
-                    name = ""
-                    addr = ""
-                    for i in range(7, len(item)):
-                        if item[i] != "!":
-                            name+=item[i]
-                            #szuka kolejnego wykrzyknika, dodaje nazwe
-                        else:
-                            if os.path.isfile("download\\%s" % name):
-                                for x in range(i, len(item)):
-                                    if item[x] != "\x00":
-                                        addr+=item[x]
-                                    else:
-                                        self.outbox.append((name,addr))
-                                        #podaje do outboxa tuple z nazwa pliku i adresem na ktory nalezy go wyslac.
-                            else:
-                                self.outbox.append((None, addr))
-                                break 
-                                #Zwraca wyslanemu brak pliku. Outbox powinien informowac o braku pliku.
+                    name,ipaddr = item[6:].split('!',1)
+                    if os.path.isfile("download{}{}".format(os.sep,name)):
+                         with open("download{}{}".format(os.sep,name),'r') as f:
+                             msg = "GFILE!{}\0{}".format(name,f.read())
+                         self.outbox.append((name,msg))
+                    else:
+                         self.outbox.append((None, addr))
+                         #Zwraca wyslanemu brak pliku. Outbox powinien informowac o braku pliku.
+
             except IndexError:
                 pass
