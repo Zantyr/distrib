@@ -30,7 +30,8 @@ if __name__ == '__main__':
             sole_actor = actor.Actor(targetProcessor=MAINPR,
                          threads=settings['clientThreads'],
                          bind_ip=settings['clientIP'],
-                         bind_port=settings['clientPort'])
+                         bind_port=settings['clientPort'],
+                         address_book=settings['addressBook'])
             signal.pause()
         elif sys.argv[1]=='server':
             if '-r' in sys.argv[2:]:
@@ -38,12 +39,14 @@ if __name__ == '__main__':
                 console = actor.Console(targetProcessor=MAINPR,cmd=command,
                           threads=settings['serverThreads'],
                           bind_ip=settings['serverIP'],
-                          bind_port=settings['serverPort'])
+                          bind_port=settings['serverPort'],
+                          address_book=settings['addressBook'])
             else:
                 console = actor.Console(targetProcessor=MAINPR,
                           threads=settings['serverThreads'],
                           bind_ip=settings['serverIP'],
-                          bind_port=settings['serverPort'])
+                          bind_port=settings['serverPort'],
+                          address_book=settings['addressBook'])
                 signal.pause()
         elif sys.argv[1]=='hybrid':
             raise NotImplementedError

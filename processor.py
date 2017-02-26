@@ -50,8 +50,8 @@ class MainProcessor(Processor):
                     print item[:5]
                 elif item[:6] == "GFILE!":
                     name,content = request[6:].split('\0',1)
-                        with open(name, "w") as f:
-                            f.write(content)
+                    with open(name, "w") as f:
+                        f.write(content)
                 elif item[:6] == "SFILE!":
                     name = ""
                     addr = ""

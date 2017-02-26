@@ -4,5 +4,8 @@
   "clientPort":1488,
   "serverThreads":5,
   "serverIP":"0.0.0.0",
-  "serverPort":1488
+  "serverPort":1488,
+  "addressBook":{
+    "kris":["192.168.0.6",1488]
+    }
 }

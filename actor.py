@@ -4,13 +4,15 @@ import sys
 import threading
 
 class Actor(object):
-    def __init__(self,threads=5,targetProcessor=None,bind_port=1488,bind_ip="0.0.0.0"):
+    def __init__(self,threads=5,targetProcessor=None,bind_port=1488,bind_ip="0.0.0.0",
+            address_book=None):
         self.inbox = deque()
         self.outbox = deque()
         self.sender = threading.Thread(target=self.send)
         self.receiver = threading.Thread(target=self.recv)
         self.threadpool = [targetProcessor(self.inbox, self.outbox) for x in range(threads)]
-        self.addressbook = {}
+        self.addressbook = ({key:tuple(val) for key,val in address_book.items()}
+            if address_book else {})
         self.bind_ip = bind_ip
         self.bind_port = bind_port
         self.sender.start()
@@ -26,7 +28,10 @@ class Actor(object):
         while True:
             try:
                 (target,message) = self.outbox.popleft()
-                target_ip,target_port = self.addressbook[target]
+                if type(target)==str:
+                    target_ip,target_port = self.addressbook[target]
+                else:
+                    target_ip,target_port = target
                 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 client.connect((target_ip, target_port))
                 client.send(message)
