@@ -24,7 +24,8 @@ SETFILE = "settings.json"
 
 if __name__ == '__main__':
     try:
-        settings = json.load(SETFILE)
+        with open(SETFILE,"r") as f:
+            settings = json.loads(f.read())
         if sys.argv[1]=='client':
             sole_actor = actor.Actor(targetProcessor=MAINPR,
                          threads=settings['clientThreads'],

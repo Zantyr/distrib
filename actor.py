@@ -1,5 +1,6 @@
 from collections import deque
 import socket
+import sys
 import threading
 
 class Actor(object):
@@ -72,12 +73,12 @@ class Console(Actor):
                 self.parse(line)
         else:
             self.parse(self.kwargs['cmd'])
-            quit()
+            sys.exit()
 
     def parse(self,line):
         line = line.split(' ',2)
         if line[0].lower() == 'quit':
-            quit()
+            sys.exit()
         elif line[0].lower() == 'add':
             tp = line[2].split(' ',1)
             self.addressbook[line[1]] = (tp[0],int(tp[1]))
