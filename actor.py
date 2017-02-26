@@ -5,12 +5,14 @@ import threading
 
 class Actor(object):
     def __init__(self,threads=5,targetProcessor=None,bind_port=1488,bind_ip="0.0.0.0",
-            address_book=None):
+            address_book=None, environment=None):
         self.inbox = deque()
         self.outbox = deque()
+        self.environment = environment if environment else {}
         self.sender = threading.Thread(target=self.send)
         self.receiver = threading.Thread(target=self.recv)
-        self.threadpool = [targetProcessor(self.inbox, self.outbox) for x in range(threads)]
+        self.threadpool = [targetProcessor(self.inbox, self.outbox, self.environment)
+                           for x in range(threads)]
         self.addressbook = ({key:tuple(val) for key,val in address_book.items()}
             if address_book else {})
         self.bind_ip = bind_ip
@@ -61,11 +63,19 @@ class Actor(object):
         """
         Internal processing of incoming TCP packets
         """
-        #larger buffer for larger messages
-        request = client_socket.recv(1024)
-        self.inbox.append(request)
-        client_socket.send("ACK!")
+        request,buffer,msg = "",True,""
+        while buffer:
+            buffer = client_socket.recv(1024)
+            request = request + buffer
+        if request[0]!="$":
+            self.inbox.append(request)
+            msg = "ACK!"
+        else: # $-requests for managing connectivity
+            if request[:5]=="$CONN":
+                msg = "CONN!"
+        client_socket.send(msg)
         client_socket.close()
+
 
 
 class Console(Actor):
@@ -98,7 +108,21 @@ class Console(Actor):
                  self.outbox.append((line[1],"MSG\0"+line[2]))
             elif line[0] == 'sendFile':
                  self.inbox.append("SFILE!{}!{}".format(line[2],line[1]))
+            elif line[0] == 'listPromises':
+                 for key in self.environment:
+                     if key[0]=='P':
+                         prom = self.environment[key]
+                         print "To: {} Lang: {} Content: {}".format(
+                             prom.executor,prom.lang,(prom.content if 
+                             prom.content else "Awaiting..."))
+            elif line[0] == 'defer':
+                 item = line[2].split(' ',2)
+                 self.inbox.append("CPROM!{}\0{}\0{}\0{}".format(
+                     item[1],item[0],line[1],item[2]))
             elif line[0] == 'outbox':
                  print self.outbox
         except IndexError:
             print "Console Syntax Error"
+
+class CodeActor(Actor):
+    pass
