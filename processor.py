@@ -61,7 +61,7 @@ class MainProcessor(Processor):
                              msg = "GFILE!{}\0{}".format(name,f.read())
                          self.outbox.append((name,msg))
                     else:
-                         self.outbox.append((None, addr))
+                         print "No file: download{}{}".format(os.sep,name)
                          #Zwraca wyslanemu brak pliku. Outbox powinien informowac o braku pliku.
 
             except IndexError:
