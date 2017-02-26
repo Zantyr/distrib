@@ -114,17 +114,23 @@ class Console(Actor):
         A master console: allows to control the threads, post problems to solve and manage the net
         """
         super(Console,self).__init__(*args,**kwargs)
-        while True:
-            line = raw_input("xD -> ")
-            line = line.split(' ',2)
-            if line[0].lower() == 'quit':
-                quit()
-            elif line[0].lower() == 'add':
-                tp = line[2].split(' ',1)
-                self.addressbook[line[1]] = (tp[0],int(tp[1]))
-            elif line[0].lower() == 'list':
-                for key in self.addressbook:
-                    print "{} has an address {}".format(key,str(self.addressbook[key]))
-            elif line[0].lower() == 'send':
-                self.outbox.append((line[1],line[2]))
+        if 'cmd' not in kwargs:
+            while True:
+                line = raw_input("xD -> ")
+                self.parse(line)
+        else:
+            self.parse(self.kwargs['cmd'])
+            quit()
 
+    def parse(self,line):
+        line = line.split(' ',2)
+        if line[0].lower() == 'quit':
+            quit()
+        elif line[0].lower() == 'add':
+            tp = line[2].split(' ',1)
+            self.addressbook[line[1]] = (tp[0],int(tp[1]))
+        elif line[0].lower() == 'list':
+            for key in self.addressbook:
+                print "{} has an address {}".format(key,str(self.addressbook[key]))
+        elif line[0].lower() == 'send':
+             self.outbox.append((line[1],line[2]))
