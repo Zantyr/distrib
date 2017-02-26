@@ -15,5 +15,5 @@ class Deferred(object):
         self.thread.start()
     def run(self):
         content = self.interpreter(self.code)
-        self.outbox((self.requester,
+        self.outbox.append((self.requester,
              "RPROM!{}\0{}".format(self.digest,content)))

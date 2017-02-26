@@ -67,12 +67,12 @@ class Actor(object):
         while buffer:
             buffer = client_socket.recv(1024)
             request = request + buffer
-        if request[0]!="$":
-            self.inbox.append(request)
-            msg = "ACK!"
-        else: # $-requests for managing connectivity
-            if request[:5]=="$CONN":
-                msg = "CONN!"
+        #if request[0]!="$":
+        self.inbox.append(request)
+        msg = "ACK!"
+        #else: # $-requests for managing connectivity
+        #    if request[:5]=="$CONN":
+        #        msg = "CONN!"
         client_socket.send(msg)
         client_socket.close()
 
