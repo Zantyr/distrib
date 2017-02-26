@@ -1,0 +1,8 @@
+{
+  "clientThreads":5,
+  "clientIP":"0.0.0.0",
+  "clientPort":1488,
+  "serverThreads":5,
+  "serverIP":"0.0.0.0",
+  "serverPort":1488
+}
