@@ -94,3 +94,6 @@ class Console(Actor):
                 print "{} has an address {}".format(key,str(self.addressbook[key]))
         elif line[0].lower() == 'send':
              self.outbox.append((line[1],"MSG\0"+line[2]))
+        elif line[0].lower() == 'sendFile':
+             self.inbox.append("SFILE!{}!{}".format(line[2],
+                    self.addressbook[line[1]][0]))
