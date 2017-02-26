@@ -41,6 +41,8 @@ class Actor(object):
                 pass
             except KeyError:
                 pass    #there is no target in the addressbook
+            except socket.error as e:
+                print "Socket Error occured: {}".format(e.errno)
 
     def recv(self):
         """
@@ -91,4 +93,4 @@ class Console(Actor):
             for key in self.addressbook:
                 print "{} has an address {}".format(key,str(self.addressbook[key]))
         elif line[0].lower() == 'send':
-             self.outbox.append((line[1],line[2]))
+             self.outbox.append((line[1],"MSG\0"+line[2]))
